@@ -21,8 +21,9 @@ namespace GameHall.Model
         [StringLength(50)]
         public string Console { get; set; } = string.Empty;
 
-        [Column(TypeName = "date")]
-        public DateTime DataLancamento { get; set; }
+        [DataType(DataType.Date)]
+        [Column(TypeName = "DATE")]
+        public DateOnly? DataLancamento { get; set; }
 
         [Column(TypeName = "decimal(6,2)")]
         public decimal Preco { get; set; }

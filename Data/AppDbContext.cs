@@ -1,5 +1,6 @@
 ﻿using GameHall.Model;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace GameHall.Data
 {
@@ -24,6 +25,26 @@ namespace GameHall.Data
 
         public DbSet<Produto> Produtos { get; set; } = null!;
         public DbSet<Categoria> Categorias { get; set; } = null!;
+
+        public class DateOnlyConverter : ValueConverter<DateOnly, DateTime>
+        {
+            public DateOnlyConverter()
+                : base(dateOnly =>
+                        dateOnly.ToDateTime(TimeOnly.MinValue),
+                    dateTime => DateOnly.FromDateTime(dateTime))
+            { }
+        }
+
+        protected override void ConfigureConventions(ModelConfigurationBuilder builder)
+        {
+
+            builder.Properties<DateOnly>()
+                .HaveConversion<DateOnlyConverter>()
+                .HaveColumnType("date");
+
+            base.ConfigureConventions(builder);
+
+        }
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
