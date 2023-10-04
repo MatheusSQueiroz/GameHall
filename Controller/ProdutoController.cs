@@ -71,9 +71,11 @@ namespace GameHall.Controller
             var validarProduto = await _produtoValidator.ValidateAsync(produto);
 
             if (!validarProduto.IsValid)
+            {
                 return StatusCode(StatusCodes.Status400BadRequest, validarProduto);
+            }
 
-            var Resposta = _produtoService.Update(produto);
+            var Resposta = await _produtoService.Update(produto);
 
             if (Resposta is null)
                 return NotFound("Game e/ou Categoria não encontrados!");

@@ -5,6 +5,11 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using GameHall.Service.Implements;
 using GameHall.Service;
+using GameHall.Security;
+using GameHall.Security.Implements;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace GameHall
 {
@@ -34,10 +39,31 @@ namespace GameHall
             // Validação das Entidades
             builder.Services.AddTransient<IValidator<Produto>, ProdutoValidator>();
             builder.Services.AddTransient<IValidator<Categoria>, CategoriaValidator>();
+            builder.Services.AddTransient<IValidator<User>, UserValidator>();
 
             //Registrar classe e interface
             builder.Services.AddScoped<IProdutoService, ProdutoService>();
             builder.Services.AddScoped<ICategoriaService, CategoriaService>();
+            builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<IAuthService, AuthService>();
+
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(options =>
+            {
+                var key = Encoding.UTF8.GetBytes(Settings.Secret);
+                options.SaveToken = true;
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key)
+                };
+            });
 
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -78,6 +104,8 @@ namespace GameHall
             app.UseCors("MyPolicy");
 
             app.UseAuthorization();
+
+            app.UseAuthentication();
 
 
             app.MapControllers();
